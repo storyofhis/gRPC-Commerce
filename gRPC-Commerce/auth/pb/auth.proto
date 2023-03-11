@@ -1,0 +1,67 @@
+syntax="proto3";
+
+package auth;
+
+option go_package = "./atuh/pb";
+import "google/protobuf/timestamp.proto";
+
+// user 
+// message user {
+//     // enum of role
+//     enum user_role {
+//         USER = 0;
+//         ADMIN = 1;
+//     }
+//     message User {
+//         string role = 1;
+//         user_role type = 2;
+//     }
+//     repeated User user = 6;
+// }
+
+// register
+message RegisterRequest {
+    string email = 1;
+    string name = 2;
+    string username = 3;
+    string password = 4;
+    int64 age = 5;
+}
+
+message RegisterResponse {
+    int64 status = 1;
+    string error = 2;
+    int64 id = 3;
+    RegisterRequest data = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
+}
+
+// login
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    int64 status = 1;
+    string error = 2;
+    string token = 3;
+}
+
+// validate 
+message ValidateRequest {
+    string token = 1;
+}
+
+message ValidateResponse {
+    int64 status = 1;
+    string error = 2;
+    int64 userId = 3;
+}
+
+service AuthService {
+    rpc Register (RegisterRequest) returns (RegisterResponse){}
+    rpc Login (LoginRequest) returns (LoginResponse){}
+    rpc Validate (ValidateRequest) returns (ValidateResponse){}
+}
