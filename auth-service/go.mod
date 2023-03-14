@@ -3,6 +3,7 @@ module github.com/storyofhis/auth-service
 go 1.18
 
 require (
+	github.com/joho/godotenv v1.5.1
 	github.com/spf13/viper v1.15.0
 	google.golang.org/grpc v1.52.0
 	google.golang.org/protobuf v1.29.0

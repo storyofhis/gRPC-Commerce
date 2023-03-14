@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/joho/godotenv"
 	"github.com/storyofhis/auth-service/common"
 	"github.com/storyofhis/auth-service/config"
 	"github.com/storyofhis/auth-service/pb"
@@ -15,6 +16,7 @@ import (
 
 func main() {
 	c, err := config.LoadConfig()
+	err = godotenv.Load("dev.env")
 	if err != nil {
 		log.Fatalln("Failed at config", err)
 	}

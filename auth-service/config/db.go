@@ -12,6 +12,7 @@ import (
 
 func ConnectionDB() (*gorm.DB, error) {
 	host := os.Getenv("PGHOST")
+	fmt.Println("test host" ,host)
 	port := os.Getenv("PGPORT")
 	user := os.Getenv("PGUSER")
 	pass := os.Getenv("PGPASS")

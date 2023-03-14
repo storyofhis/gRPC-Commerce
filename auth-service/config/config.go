@@ -9,9 +9,10 @@ type Config struct {
 }
 
 func LoadConfig() (config Config, err error) {
-	viper.AddConfigPath("./config/envs")
-	viper.SetConfigName("dev")
-	viper.SetConfigType("env")
+	// viper.AddConfigPath("./config/envs")
+	// viper.SetConfigName("dev")
+	// viper.SetConfigType("env")
+	viper.SetConfigFile("dev.env")
 
 	viper.AutomaticEnv()
 
@@ -20,9 +21,9 @@ func LoadConfig() (config Config, err error) {
 		return
 	}
 
-	err = viper.Unmarshal(&config)
-	if err != nil {
-		return
-	}
+	// err = viper.Unmarshal(&config)
+	// if err != nil {
+	// 	return
+	// }
 	return
 }
