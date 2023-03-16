@@ -1,28 +1,16 @@
 package config
 
 import (
-	"fmt"
 	"log"
-	"os"
 
 	"github.com/storyofhis/auth-service/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func ConnectionDB() (*gorm.DB, error) {
-	host := os.Getenv("PGHOST")
-	port := os.Getenv("PGPORT")
-	user := os.Getenv("PGUSER")
-	pass := os.Getenv("PGPASS")
-	name := os.Getenv("PGDATABASE")
+func ConnectionDB(url string) (*gorm.DB, error) {
 
-	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, pass, name,
-	)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(url), &gorm.Config{})
 	if err != nil {
 		log.Println("Can not open connection")
 		return nil, err

@@ -15,11 +15,12 @@ import (
 
 func main() {
 	c, err := config.LoadConfig()
+	// err := godotenv.Load("./config/envs/dev.env")
 	if err != nil {
 		log.Fatalln("Failed at config", err)
 	}
 
-	db, err := config.ConnectionDB()
+	db, err := config.ConnectionDB(c.DBUrl)
 	if err != nil {
 		log.Fatalln("Can not Connection to DB", err)
 	}
