@@ -33,20 +33,20 @@ func (svc *AuthServerSvc) Register(ctx context.Context, req *pb.RegisterRequest)
 			Error:  "E-MAIL already exist",
 		}, nil
 	}
-	// _, err = svc.Repo. FindUserByUsername(ctx, req)
-	// if err == nil {
-	// 	return &pb.RegisterResponse{
-	// 		Status: http.StatusConflict,
-	// 		Error:  "Username already exist",
-	// 	}, nil
-	// }
+	_, err = svc.Repo.FindUserByUsername(ctx, req)
+	if err == nil {
+		return &pb.RegisterResponse{
+			Status: http.StatusConflict,
+			Error:  "Username already exist",
+		}, nil
+	}
 
-	// if err != nil && err != gorm.ErrRecordNotFound {
-	// 	return &pb.RegisterResponse{
-	// 		Status: http.StatusInternalServerError,
-	// 		Error:  "Internal Server Error",
-	// 	}, nil
-	// }
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return &pb.RegisterResponse{
+			Status: http.StatusInternalServerError,
+			Error:  "Internal Server Error",
+		}, nil
+	}
 
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 
