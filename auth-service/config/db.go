@@ -17,7 +17,7 @@ func ConnectionDB(url string) (*gorm.DB, error) {
 	}
 
 	// automigrate
-	db.Debug().AutoMigrate(&models.Users{})
+	db.AutoMigrate(&models.Users{})
 
 	return db, nil
 }

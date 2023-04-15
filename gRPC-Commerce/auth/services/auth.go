@@ -24,7 +24,7 @@ func NewAuthSvc(repo repositories.AuthRepositories) *AuthSvc {
 }
 
 func (svc *AuthSvc) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	user, err := svc.repo.FindUserByEmail(ctx, req.Email)
+	user, err := svc.repo.FindUserByEmail(ctx, req)
 	if err == nil {
 		return &pb.RegisterResponse{
 			Status: http.StatusConflict,
@@ -32,7 +32,7 @@ func (svc *AuthSvc) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 		}, nil
 	}
 
-	_, err = svc.repo.FindUserByUsername(ctx, req.Username)
+	_, err = svc.repo.FindUserByUsername(ctx, req)
 	if err == nil {
 		return &pb.RegisterResponse{
 			Status: http.StatusConflict,
@@ -78,7 +78,7 @@ func (svc *AuthSvc) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 }
 
 func (svc *AuthSvc) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	user, err := svc.repo.FindUserByEmail(ctx, req.Email)
+	user, err := svc.repo.FindUserByEmailLogin(ctx, req)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return &pb.LoginResponse{
@@ -118,7 +118,11 @@ func (svc *AuthSvc) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.
 
 	user := new(models.Users)
 
-	_, err = svc.repo.FindUserByEmail(ctx, claims.Email)
+	err = svc.repo.DB.Where(
+		&models.Users{
+			Email: claims.Email,
+		},
+	).First(user).Error
 	if err != nil {
 		return &pb.ValidateResponse{
 			Status: http.StatusNotFound,

@@ -36,10 +36,10 @@ func main() {
 		log.Fatalln("Failed to listing: ", err)
 	}
 
-	fmt.Println("Auth Service on PORT: ", err)
+	fmt.Println("Auth Service on PORT: ", c.Port)
 
 	repo := repositories.NewAuthServerRepo(db)
-	svc := services.NewServiceServer(*repo, jwt)
+	svc := services.NewServiceServer(repo, jwt)
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterAuthServiceServer(grpcServer, svc)

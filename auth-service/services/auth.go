@@ -13,11 +13,11 @@ import (
 )
 
 type AuthServerSvc struct {
-	Repo repositories.AuthServerRepo
+	Repo *repositories.AuthServerRepo
 	Jwt  common.JwtWrapper
 }
 
-func NewServiceServer(repo repositories.AuthServerRepo, Jwt common.JwtWrapper) *AuthServerSvc {
+func NewServiceServer(repo *repositories.AuthServerRepo, Jwt common.JwtWrapper) *AuthServerSvc {
 	return &AuthServerSvc{
 		Repo: repo,
 		Jwt:  Jwt,
@@ -25,27 +25,28 @@ func NewServiceServer(repo repositories.AuthServerRepo, Jwt common.JwtWrapper) *
 }
 
 func (svc *AuthServerSvc) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	user, err := svc.Repo.FindUserByEmail(ctx, req.Email)
+	user, err := svc.Repo.FindUserByEmail(ctx, req)
+	// fmt.Println("teesty", user)
 	if err == nil {
 		return &pb.RegisterResponse{
 			Status: http.StatusConflict,
 			Error:  "E-MAIL already exist",
 		}, nil
 	}
-	_, err = svc.Repo.FindUserByUsername(ctx, req.Username)
-	if err == nil {
-		return &pb.RegisterResponse{
-			Status: http.StatusConflict,
-			Error:  "Username already exist",
-		}, nil
-	}
+	// _, err = svc.Repo. FindUserByUsername(ctx, req)
+	// if err == nil {
+	// 	return &pb.RegisterResponse{
+	// 		Status: http.StatusConflict,
+	// 		Error:  "Username already exist",
+	// 	}, nil
+	// }
 
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return &pb.RegisterResponse{
-			Status: http.StatusInternalServerError,
-			Error:  "Internal Server Error",
-		}, nil
-	}
+	// if err != nil && err != gorm.ErrRecordNotFound {
+	// 	return &pb.RegisterResponse{
+	// 		Status: http.StatusInternalServerError,
+	// 		Error:  "Internal Server Error",
+	// 	}, nil
+	// }
 
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 
@@ -78,7 +79,7 @@ func (svc *AuthServerSvc) Register(ctx context.Context, req *pb.RegisterRequest)
 }
 
 func (svc *AuthServerSvc) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	user, err := svc.Repo.FindUserByEmail(ctx, req.Email)
+	user, err := svc.Repo.FindUserByEmailLogin(ctx, req)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return &pb.LoginResponse{
@@ -91,16 +92,16 @@ func (svc *AuthServerSvc) Login(ctx context.Context, req *pb.LoginRequest) (*pb.
 			Error:  "Invalid Server Error",
 		}, err
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(req.Password), []byte(user.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
 		return &pb.LoginResponse{
 			Status: http.StatusBadRequest,
-			Error:  "Status Bad Request",
+			Error:  "Status Bad Request" + err.Error(),
 		}, nil
 	}
 
 	// response
-	token, _ := svc.Jwt.GenerateToken(*user)
+	token, _ := svc.Jwt.GenerateToken(user)
 	return &pb.LoginResponse{
 		Status: http.StatusOK,
 		Token:  token,
@@ -118,7 +119,11 @@ func (svc *AuthServerSvc) Validate(ctx context.Context, req *pb.ValidateRequest)
 
 	user := new(models.Users)
 
-	_, err = svc.Repo.FindUserByEmail(ctx, claims.Email)
+	err = svc.Repo.DB.Where(
+		&models.Users{
+			Email: claims.Email,
+		},
+	).First(user).Error
 	if err != nil {
 		return &pb.ValidateResponse{
 			Status: http.StatusNotFound,

@@ -2,10 +2,10 @@ package repositories
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/storyofhis/gRPC-Commerce/auth/models"
+	"github.com/storyofhis/gRPC-Commerce/auth/pb"
 	"gorm.io/gorm"
 )
 
@@ -27,18 +27,26 @@ func (repo *AuthRepositories) CreateUser(ctx context.Context, user *models.Users
 	return nil
 }
 
-func (repo *AuthRepositories) FindUserByEmail(ctx context.Context, email string) (*models.Users, error) {
+func (repo *AuthRepositories) FindUserByEmail(ctx context.Context, req *pb.RegisterRequest) (*models.Users, error) {
 	user := new(models.Users)
-	err := repo.DB.WithContext(ctx).Where("LOWER(email) = ?", strings.ToLower(email)).Take(user).Error
+	err := repo.DB.WithContext(ctx).Where(
+		&models.Users{
+			Email: req.Email,
+		},
+	).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (repo *AuthRepositories) FindUserByUsername(ctx context.Context, username string) (*models.Users, error) {
+func (repo *AuthRepositories) FindUserByUsername(ctx context.Context, req *pb.RegisterRequest) (*models.Users, error) {
 	user := new(models.Users)
-	err := repo.DB.WithContext(ctx).Where("LOWER(username) = ?", strings.ToLower(username)).Take(user).Error
+	err := repo.DB.WithContext(ctx).Where(
+		&models.Users{
+			Username: req.Username,
+		},
+	).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +55,24 @@ func (repo *AuthRepositories) FindUserByUsername(ctx context.Context, username s
 
 func (repo *AuthRepositories) FindUserByUId(ctx context.Context, id int64) (*models.Users, error) {
 	user := new(models.Users)
-	err := repo.DB.WithContext(ctx).Where("id = ?", id).Take(user).Error
+	err := repo.DB.WithContext(ctx).Where(
+		&models.Users{
+			Id: uint(id),
+		},
+	).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (repo *AuthRepositories) FindUserByEmailLogin(ctx context.Context, req *pb.LoginRequest) (*models.Users, error) {
+	user := new(models.Users)
+	err := repo.DB.WithContext(ctx).Where(
+		&models.Users{
+			Email: req.Email,
+		},
+	).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
